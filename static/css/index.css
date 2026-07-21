@@ -60,8 +60,11 @@ section + section { border-top: 1px solid var(--border); margin-top: 34px; }
 /* ---------- hero ---------- */
 .hero { text-align: center; padding: 64px 0 18px; }
 .hero .title {
-  font-size: clamp(2.1rem, 5vw, 3.1rem);
+  font-size: clamp(1.6rem, 3.7vw, 2.75rem);
   margin: 0 0 10px;
+}
+@media (min-width: 1000px) {
+  .hero .title { white-space: nowrap; }
 }
 .hero .title .iso-mark { color: var(--accent); }
 .hero .title-icon { height: 0.82em; width: auto; vertical-align: -0.08em; margin-right: 0.14em; }
