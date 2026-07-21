@@ -64,6 +64,7 @@ section + section { border-top: 1px solid var(--border); margin-top: 34px; }
   margin: 0 0 10px;
 }
 .hero .title .iso-mark { color: var(--accent); }
+.hero .title-icon { height: 0.82em; width: auto; vertical-align: -0.08em; margin-right: 0.14em; }
 .hero .subtitle {
   font-size: 1.22rem;
   color: var(--ink-2);
