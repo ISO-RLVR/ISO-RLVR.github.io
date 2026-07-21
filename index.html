@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="static/css/index.css?v=5">
+  <link rel="stylesheet" href="static/css/index.css?v=6">
 </head>
 <body>
 
@@ -174,9 +174,81 @@
     </div>
     <p class="figure-caption">
       <b>Restoring the base spectrum preserves RLVR's gains at every α.</b>
-      The converse interventions complete the picture: grafting the RL spectrum onto the <em>base</em> frames gives no improvement,
-      and a spectrum-only parameterization (frames frozen, singular values trainable) fails to learn comparably.
-      What RLVR needs to change is the frames.
+      A spectrum-only parameterization (frames frozen, singular values trainable) likewise fails to learn comparably —
+      what RLVR needs to change is the frames.
+    </p>
+
+    <h3>The mirror test: graft the RL spectrum into the SFT frames</h3>
+    <p>
+      Run the same interpolation in the opposite direction: <b>fix the frames of the SFT model</b>
+      <span class="math">(U<sub>SFT</sub>, V<sub>SFT</sub>)</span> and blend the spectrum <em>toward</em> the RL-trained
+      <span class="math">&Sigma;<sub>RL</sub></span>. If RLVR's gains lived in the spectrum, scores should climb toward the RL
+      checkpoint as α grows. They don't move at all:
+    </p>
+
+    <div class="alpha-lab">
+      <div class="lab-title">Spectrum interpolation with SFT frames fixed (mirror control)</div>
+      <div class="lab-sub">Each of the six slider stops is a separately evaluated model. The dashed marks show the full RL checkpoint — the bars never approach them.</div>
+
+      <div class="alpha-formula">
+        <span class="math">W&#771;(&alpha;) &nbsp;=&nbsp; U<sub>SFT</sub>&thinsp;
+        [&thinsp;<span class="coef coef-base" id="coef-base-sft">1.0</span>&thinsp;&middot;&thinsp;&Sigma;<sub>SFT</sub>
+        &nbsp;+&nbsp;
+        <span class="coef coef-rl" id="coef-rl-sft">0.0</span>&thinsp;&middot;&thinsp;&Sigma;<sub>RL</sub>&thinsp;]&thinsp;
+        V<sub>SFT</sub><sup>&#8868;</sup></span>
+      </div>
+
+      <div class="alpha-controls">
+        <span class="alpha-readout" id="alpha-readout-sft">α = 0.0</span>
+        <input type="range" class="alpha-slider" id="alpha-slider-sft" min="0" max="1" step="0.2" value="0"
+               aria-label="Spectrum interpolation coefficient alpha, SFT frames fixed (six evaluated anchors)">
+        <button class="play-btn" id="alpha-play-sft">▶ Sweep α</button>
+      </div>
+      <div class="alpha-endpoints">
+        <span>α = 0 &nbsp;·&nbsp; original SFT model</span>
+        <span class="rl-end">α = 1 &nbsp;·&nbsp; SFT frames + full RL spectrum</span>
+      </div>
+
+      <div class="alpha-stats">
+        <div class="stat-tile">
+          <div class="stat-label">Average score at current <span class="no-tt">α</span></div>
+          <div class="stat-value"><span id="avg-at-alpha-sft">–</span></div>
+          <div class="stat-note" id="avg-note-sft"></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Full RL checkpoint</div>
+          <div class="stat-value">46.0</div>
+          <div class="stat-note">average over the same 7 benchmarks</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Δ vs. RL checkpoint</div>
+          <div class="stat-value"><span id="delta-vs-rl-sft">–</span></div>
+          <div class="stat-note">the RL spectrum alone buys none of the gains</div>
+        </div>
+      </div>
+
+      <svg id="alpha-chart-sft" role="img" aria-label="Per-benchmark scores with SFT frames fixed and the spectrum interpolated toward the RL one; bars stay flat at the SFT level, far below the RL-checkpoint reference marks."></svg>
+      <div class="chart-legend">
+        <span class="key"><span class="swatch-bar slate"></span> score of <span class="math">W&#771;(&alpha;)</span> — SFT frames, interpolated spectrum</span>
+        <span class="key"><span class="swatch-dash green"></span> full RL checkpoint (Nemotron, ~3k RLVR updates)</span>
+      </div>
+
+      <details class="data-table">
+        <summary>Show the evaluated anchor data</summary>
+        <div class="table-scroll">
+          <table class="results">
+            <thead><tr><th>Benchmark</th><th>RL ckpt</th><th>α=0.0</th><th>α=0.2</th><th>α=0.4</th><th>α=0.6</th><th>α=0.8</th><th>α=1.0</th></tr></thead>
+            <tbody id="anchor-table-body-sft"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+    <p class="figure-caption">
+      <b>The RL spectrum in SFT frames buys nothing — at any mixing ratio.</b>
+      All 7 metrics stay pinned at the SFT level (α-sweep range ≤ 3.2pp, within Mean@n sampling noise; the α=0 endpoint
+      reproduces the original SFT model to ≤ 0.8pp). The spectra themselves barely differ — relative drift
+      ‖ΔΣ‖/‖Σ‖ ≤ 0.04% across all 198 matrices. Together with the panel above, the evidence runs in both directions:
+      <em>useful RLVR progress is carried by singular-frame motion, not by spectral rescaling.</em>
     </p>
   </div>
 </section>
@@ -478,17 +550,6 @@
 
 <script src="static/js/alpha.js"></script>
 <script>
-  // fill anchor-data table from the same DATA used by the chart
-  (function () {
-    const tbody = document.getElementById("anchor-table-body");
-    DATA.forEach(b => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = "<td>" + b.name + "</td><td>" + b.base.toFixed(2) + "</td>" +
-        b.scores.map(s => "<td>" + s.toFixed(2) + "</td>").join("");
-      tbody.appendChild(tr);
-    });
-  })();
-
   // copy bibtex
   document.getElementById("copy-bibtex").addEventListener("click", function () {
     navigator.clipboard.writeText(document.getElementById("bibtex-block").textContent).then(() => {

@@ -254,6 +254,8 @@ section + section { border-top: 1px solid var(--border); margin-top: 34px; }
 .chart-legend .swatch-dash {
   width: 3px; height: 14px; background: var(--gray-mark); display: inline-block; border-radius: 1px;
 }
+.chart-legend .swatch-bar.slate { background: var(--gray-mark); }
+.chart-legend .swatch-dash.green { background: var(--green); }
 
 .chart-tooltip {
   position: fixed; pointer-events: none; z-index: 50;
