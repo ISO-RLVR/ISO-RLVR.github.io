@@ -41,7 +41,7 @@
 
   <div class="hero-links">
     <a class="btn btn-accent" href="#"><svg viewBox="0 0 16 16"><path d="M2 2h9l3 3v9a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm8 1H3v11h10V6h-3V3z"/></svg>Paper (arXiv)</a>
-    <a class="btn" href="#"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>Code</a>
+    <a class="btn" href="https://github.com/zhuhanqing/ISO"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>Code</a>
     <a class="btn" href="#citation"><svg viewBox="0 0 16 16"><path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H2.5A1.5 1.5 0 0 0 1 4.5v9A1.5 1.5 0 0 0 2.5 15h9a1.5 1.5 0 0 0 1.5-1.5V13h1.5A1.5 1.5 0 0 0 16 11.5v-9A1.5 1.5 0 0 0 14.5 1h-8zM13 13v.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5H5v7A1.5 1.5 0 0 0 6.5 13H13z"/></svg>BibTeX</a>
   </div>
 </header>
@@ -113,7 +113,7 @@
 
     <div class="alpha-lab">
       <div class="lab-title">Spectrum interpolation with RL-trained frames fixed</div>
-      <div class="lab-sub">Every point on this slider is a different model. Only the singular values change; the frames never move.</div>
+      <div class="lab-sub">Each of the six slider stops is a separately evaluated model. Only the singular values change; the frames never move.</div>
 
       <div class="alpha-formula">
         <span class="math">W&#771;(&alpha;) &nbsp;=&nbsp; U<sub>RL</sub>&thinsp;
@@ -124,9 +124,9 @@
       </div>
 
       <div class="alpha-controls">
-        <span class="alpha-readout" id="alpha-readout">α = 0.00</span>
-        <input type="range" class="alpha-slider" id="alpha-slider" min="0" max="1" step="0.01" value="0"
-               aria-label="Spectrum interpolation coefficient alpha">
+        <span class="alpha-readout" id="alpha-readout">α = 0.0</span>
+        <input type="range" class="alpha-slider" id="alpha-slider" min="0" max="1" step="0.2" value="0"
+               aria-label="Spectrum interpolation coefficient alpha (six evaluated anchors)">
         <button class="play-btn" id="alpha-play">▶ Sweep α</button>
       </div>
       <div class="alpha-endpoints">
@@ -142,8 +142,8 @@
         </div>
         <div class="stat-tile">
           <div class="stat-label">Base model (pre-RL)</div>
-          <div class="stat-value">33.0</div>
-          <div class="stat-note">average over the 7 benchmarks</div>
+          <div class="stat-value">37.6</div>
+          <div class="stat-note">average over the 5 math benchmarks</div>
         </div>
         <div class="stat-tile">
           <div class="stat-label">Δ vs. full RL checkpoint</div>
@@ -159,7 +159,7 @@
       </div>
 
       <details class="data-table">
-        <summary>Show anchor data (digitized from Fig. 4a)</summary>
+        <summary>Show the evaluated anchor data (Fig. 4a)</summary>
         <div class="table-scroll">
           <table class="results">
             <thead><tr><th>Benchmark</th><th>Base</th><th>α=0.0</th><th>α=0.2</th><th>α=0.4</th><th>α=0.6</th><th>α=0.8</th><th>α=1.0 (RL)</th></tr></thead>
@@ -478,8 +478,8 @@
     const tbody = document.getElementById("anchor-table-body");
     DATA.forEach(b => {
       const tr = document.createElement("tr");
-      tr.innerHTML = "<td>" + b.name + "</td><td>" + b.base.toFixed(1) + "</td>" +
-        b.scores.map(s => "<td>" + s.toFixed(1) + "</td>").join("");
+      tr.innerHTML = "<td>" + b.name + "</td><td>" + b.base.toFixed(2) + "</td>" +
+        b.scores.map(s => "<td>" + s.toFixed(2) + "</td>").join("");
       tbody.appendChild(tr);
     });
   })();

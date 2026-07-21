@@ -1,25 +1,24 @@
 /* ============================================================
-   Interactive spectrum-interpolation (rebase) demo — Fig. 4(a)
+   Interactive spectrum-interpolation (rebase) experiment — Fig. 4(a)
    W~(alpha) = U_RL [ (1-alpha) * Sigma_0 + alpha * Sigma_RL ] V_RL^T
    RL-trained frames are held fixed; only the spectrum is interpolated.
 
-   NOTE: scores below are digitized from Fig. 4(a) of the paper
+   Each alpha anchor is a separately evaluated model
    (DeepSeek-R1-Distill-Qwen-1.5B -> Nemotron-Research-Reasoning-
-   Qwen-1.5B, >3,000 RLVR updates). Replace with exact evaluation
-   numbers if desired — only this DATA block needs to change.
+   Qwen-1.5B, >3,000 RLVR updates). The slider snaps to the six
+   evaluated anchors — there is no interpolation between them.
+   Base scores are the DS-1.5B numbers from Table 2 of the paper.
    ============================================================ */
 
 const ALPHAS = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0];
 
 const DATA = [
   // name, base-model score, scores at ALPHAS (RL frames fixed)
-  { name: "AIME 2024",    base: 30.9, scores: [50.4, 51.0, 50.6, 48.9, 50.8, 51.9] },
-  { name: "AIME 2025",    base: 23.4, scores: [33.4, 33.0, 33.6, 33.2, 32.8, 33.5] },
-  { name: "AMC 2023",     base: 63.2, scores: [81.6, 80.9, 80.3, 81.0, 79.5, 81.2] },
-  { name: "Minerva",      base: 27.3, scores: [34.9, 35.2, 34.8, 35.0, 35.1, 35.3] },
-  { name: "Olympiad",     base: 43.1, scores: [59.1, 59.5, 58.9, 59.8, 59.2, 59.6] },
-  { name: "LCB pass@1",   base: 17.4, scores: [27.2, 26.8, 27.0, 27.3, 26.5, 27.1] },
-  { name: "LCB pass@4",   base: 25.9, scores: [33.0, 33.4, 32.7, 33.1, 33.5, 33.2] },
+  { name: "AIME 2024", base: 30.90, scores: [48.96, 49.17, 50.31, 48.23, 50.31, 51.56] },
+  { name: "AIME 2025", base: 23.40, scores: [32.71, 33.65, 33.23, 33.02, 33.23, 32.71] },
+  { name: "AMC 2023",  base: 63.15, scores: [82.23, 80.42, 80.27, 81.17, 79.67, 81.17] },
+  { name: "Minerva",   base: 27.33, scores: [34.47, 33.55, 35.11, 34.83, 34.47, 33.46] },
+  { name: "Olympiad",  base: 43.11, scores: [59.22, 58.89, 58.81, 59.63, 59.00, 59.15] },
 ];
 
 const GREEN = "#1a7f37";
@@ -28,17 +27,17 @@ const GRID = "#e5e7eb";
 const INK2 = "#3f4854";
 const MUTED = "#6b7280";
 
-/* piecewise-linear interpolation over the alpha anchors */
-function scoreAt(bench, a) {
-  const s = bench.scores;
-  if (a <= 0) return s[0];
-  if (a >= 1) return s[s.length - 1];
-  const x = a / 0.2;
-  const i = Math.min(Math.floor(x), s.length - 2);
-  const t = x - i;
-  return s[i] * (1 - t) + s[i + 1] * t;
+/* alpha takes only the six evaluated anchor values */
+const STEP = 0.2;
+function snap(a) {
+  return Math.min(Math.max(Math.round(a / STEP) * STEP, 0), 1);
 }
-
+function idxOf(a) {
+  return Math.round(snap(a) / STEP);
+}
+function scoreAt(bench, a) {
+  return bench.scores[idxOf(a)];
+}
 function avgAt(a) {
   return DATA.reduce((acc, b) => acc + scoreAt(b, a), 0) / DATA.length;
 }
@@ -47,7 +46,7 @@ const RL_AVG = avgAt(1.0);
 
 /* ---------- build the SVG chart ---------- */
 const M = { top: 18, right: 56, bottom: 34, left: 118 };
-const ROW_H = 34, BAR_H = 16;
+const ROW_H = 36, BAR_H = 16;
 const W = 900;
 const H = M.top + DATA.length * ROW_H + M.bottom;
 const plotW = W - M.left - M.right;
@@ -83,7 +82,7 @@ const rows = DATA.map((b, i) => {
     x: xScale(0), y: cy - BAR_H / 2, height: BAR_H, width: 0,
     rx: 4, fill: GREEN,
   });
-  bar.style.transition = "width 80ms linear";
+  bar.style.transition = "width 120ms ease";
 
   // base-model reference: dashed vertical tick
   el("line", {
@@ -107,9 +106,9 @@ rows.forEach(r => {
     const s = scoreAt(r.bench, a);
     tip.innerHTML =
       `<div class="tt-title">${r.bench.name}</div>` +
-      `<div>score at &alpha;=${a.toFixed(2)}: <b>${s.toFixed(1)}</b></div>` +
-      `<div class="tt-dim">base model (pre-RL): ${r.bench.base.toFixed(1)}</div>` +
-      `<div class="tt-dim">gain kept by RL frames: +${(s - r.bench.base).toFixed(1)}</div>`;
+      `<div>score at &alpha;=${a.toFixed(1)}: <b>${s.toFixed(2)}</b></div>` +
+      `<div class="tt-dim">base model (pre-RL): ${r.bench.base.toFixed(2)}</div>` +
+      `<div class="tt-dim">gain kept by RL frames: +${(s - r.bench.base).toFixed(2)}</div>`;
     tip.style.left = Math.min(ev.clientX + 14, window.innerWidth - 280) + "px";
     tip.style.top = (ev.clientY + 14) + "px";
     tip.classList.add("show");
@@ -129,10 +128,11 @@ const deltaTile = document.getElementById("delta-vs-rl");
 let current = 0.0;
 
 function render(a) {
+  a = snap(a);
   current = a;
-  readout.textContent = "α = " + a.toFixed(2);
-  coefBase.textContent = (1 - a).toFixed(2);
-  coefRL.textContent = a.toFixed(2);
+  readout.textContent = "α = " + a.toFixed(1);
+  coefBase.textContent = (1 - a).toFixed(1);
+  coefRL.textContent = a.toFixed(1);
 
   rows.forEach(r => {
     const s = scoreAt(r.bench, a);
@@ -143,32 +143,33 @@ function render(a) {
   });
 
   const avg = avgAt(a);
-  avgTile.textContent = avg.toFixed(1);
+  avgTile.textContent = avg.toFixed(2);
   avgNote.textContent = "+" + (avg - BASE_AVG).toFixed(1) + " over the base model";
   const d = avg - RL_AVG;
-  deltaTile.textContent = (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(1);
+  deltaTile.textContent = (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(2);
 }
 
 slider.addEventListener("input", () => render(parseFloat(slider.value)));
 
-/* sweep animation */
+/* sweep animation: step through the six evaluated anchors and back */
 const playBtn = document.getElementById("alpha-play");
 let sweeping = false;
 playBtn.addEventListener("click", () => {
   if (sweeping) return;
   sweeping = true;
   playBtn.disabled = true;
-  const t0 = performance.now(), DUR = 3200;
-  function tick(t) {
-    const p = Math.min((t - t0) / DUR, 1);
-    // ease out-and-back: 0 -> 1 -> 0
-    const a = p < 0.5 ? p * 2 : (1 - p) * 2;
-    slider.value = a.toFixed(3);
-    render(a);
-    if (p < 1) requestAnimationFrame(tick);
-    else { sweeping = false; playBtn.disabled = false; slider.value = "0"; render(0); }
-  }
-  requestAnimationFrame(tick);
+  const seq = ALPHAS.concat(ALPHAS.slice(0, -1).reverse()); // 0 -> 1 -> 0
+  let i = 0;
+  const timer = setInterval(() => {
+    slider.value = seq[i].toFixed(1);
+    render(seq[i]);
+    i += 1;
+    if (i >= seq.length) {
+      clearInterval(timer);
+      sweeping = false;
+      playBtn.disabled = false;
+    }
+  }, 420);
 });
 
 render(0.0);

@@ -24,12 +24,9 @@ static/images/          # figures
    # crop to the figure and save as static/images/teaser.png
    ```
 
-2. **Links** — fill in the real arXiv URL, code repo URL, and author homepage links in
-   `index.html` (search for `href="#"`), and the arXiv id in the BibTeX block.
-
-3. **α-slider data** — the per-benchmark scores in `static/js/alpha.js` (`DATA` block at the
-   top) are digitized from Fig. 4(a). Replace them with the exact evaluation numbers when
-   convenient; nothing else needs to change.
+2. **Links** — code repo is set (https://github.com/zhuhanqing/ISO); still missing: the
+   arXiv URL on the Paper button, author homepage links (search `href="#"`), and the
+   arXiv id in the BibTeX block.
 
 ## Figure provenance
 
