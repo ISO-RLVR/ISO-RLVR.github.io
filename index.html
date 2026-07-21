@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="static/css/index.css?v=7">
+  <link rel="stylesheet" href="static/css/index.css?v=8">
 </head>
 <body>
 
@@ -309,9 +309,9 @@
       &nbsp;<span class="math">U, V</span> on the Stiefel manifold.
     </p>
 
-    <div class="iso-anim" aria-label="U rotates, Sigma-0 stays frozen, V rotates">
+    <div class="iso-anim" aria-label="The tangent plane rides along the trajectory on each frame manifold while Sigma-0 stays frozen">
       <div class="iso-anim-item">
-        <img src="static/images/ellipsoid_U.png" alt="Output frame U evolving on its Stiefel manifold" class="ellipsoid rock-cw">
+        <canvas id="manifold-u" aria-label="Output frame U moving on its Stiefel manifold with the tangent plane anchored at the current point"></canvas>
         <div class="iso-anim-label"><span class="math">U</span> — output frame · <b>moves</b></div>
       </div>
       <div class="iso-anim-op math">&times;</div>
@@ -330,10 +330,16 @@
       </div>
       <div class="iso-anim-op math">&times;</div>
       <div class="iso-anim-item">
-        <img src="static/images/ellipsoid_V.png" alt="Input frame V evolving on its Stiefel manifold" class="ellipsoid rock-ccw">
+        <canvas id="manifold-v" aria-label="Input frame V moving on its Stiefel manifold with the tangent plane anchored at the current point"></canvas>
         <div class="iso-anim-label"><span class="math">V<sup>&#8868;</sup></span> — input frame · <b>moves</b></div>
       </div>
     </div>
+    <p class="figure-caption" style="text-align:center; margin-top:-16px; margin-bottom:26px">
+      The tangent space <span class="math">T<sub>U<sub>t</sub></sub></span> rides along the trajectory: at each step the base optimizer takes a
+      <span style="color:var(--accent); font-weight:600">tentative update</span> in the tangent plane, and the
+      <span style="color:#c62828; font-weight:600">polar retraction</span> puts the iterate back on the manifold — so every
+      <span class="math">W<sub>t</sub> = U<sub>t</sub>&thinsp;&Sigma;<sub>0</sub>&thinsp;V<sub>t</sub><sup>&#8868;</sup></span> keeps the base spectrum exactly.
+    </p>
 
     <p>
       Every represented matrix shares the base spectrum <span class="math">&Sigma;<sub>0</sub></span> exactly; all learning and composition happen in the frame
@@ -575,6 +581,7 @@
 </footer>
 
 <script src="static/js/alpha.js?v=2"></script>
+<script src="static/js/manifold.js?v=1"></script>
 <script>
   // copy bibtex
   document.getElementById("copy-bibtex").addEventListener("click", function () {

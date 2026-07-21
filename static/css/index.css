@@ -295,22 +295,12 @@ details.data-table summary { cursor: pointer; color: var(--muted); }
   margin: 6px 0 34px;
 }
 .iso-anim-item { text-align: center; }
-.iso-anim-item .ellipsoid { height: 190px; width: auto; display: block; margin: 0 auto 10px; }
+.iso-anim-item canvas { display: block; margin: 0 auto 2px; }
 .iso-anim-op { font-size: 1.6rem; color: var(--muted); padding: 0 6px 34px; }
 .iso-anim-label { font-size: 0.86rem; color: var(--muted); }
 .iso-anim-label b { color: var(--ink-2); }
 .iso-anim-item:first-child .iso-anim-label b,
 .iso-anim-item:last-child .iso-anim-label b { color: var(--accent); }
-
-@keyframes rock-cw {
-  0%   { transform: rotate(-8deg); }
-  100% { transform: rotate(8deg); }
-}
-.ellipsoid.rock-cw  { animation: rock-cw 5.5s ease-in-out infinite alternate; }
-.ellipsoid.rock-ccw { animation: rock-cw 5.5s ease-in-out infinite alternate-reverse; }
-@media (prefers-reduced-motion: reduce) {
-  .ellipsoid.rock-cw, .ellipsoid.rock-ccw { animation: none; }
-}
 
 .sigma-matrix { display: flex; align-items: stretch; justify-content: center; margin-bottom: 10px; height: 130px; }
 .sigma-matrix .bracket { width: 12px; border: 2.5px solid var(--ink-2); }
