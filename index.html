@@ -431,19 +431,19 @@
         </thead>
         <tbody>
           <tr><td>Base (Qwen2.5-7B-Instruct)</td><td>36.25</td><td>48.27</td><td>28.31</td><td>43.08</td><td>62.96</td><td>69.26</td><td>49.87</td><td>45.54</td><td>58.90</td><td>56.77</td><td>49.92</td></tr>
-          <tr class="expert"><td>RLVR-Coder</td><td>37.42</td><td>49.42</td><td>30.17</td><td>44.24</td><td>63.37</td><td>68.07</td><td>50.21</td><td>45.61</td><td>60.51</td><td>56.84</td><td>50.59</td></tr>
-          <tr class="expert"><td>RLVR-Tool</td><td>36.87</td><td>48.08</td><td>28.20</td><td>42.43</td><td>71.83</td><td>81.82</td><td>50.39</td><td>45.33</td><td>59.73</td><td>57.86</td><td>52.25</td></tr>
-          <tr class="expert"><td>RLVR-Memory</td><td>37.32</td><td>50.05</td><td>27.41</td><td>41.70</td><td>63.82</td><td>72.61</td><td>78.60</td><td class="best">77.95</td><td class="best">79.98</td><td class="best">78.52</td><td>60.80</td></tr>
+          <tr class="expert"><td>RLVR-Coder</td><td class="best">37.42</td><td>49.42</td><td class="best">30.17</td><td class="best">44.24</td><td>63.37</td><td>68.07</td><td>50.21</td><td>45.61</td><td>60.51</td><td>56.84</td><td>50.59</td></tr>
+          <tr class="expert"><td>RLVR-Tool</td><td>36.87</td><td>48.08</td><td>28.20</td><td>42.43</td><td class="best">71.83</td><td class="best">81.82</td><td>50.39</td><td>45.33</td><td>59.73</td><td>57.86</td><td>52.25</td></tr>
+          <tr class="expert"><td>RLVR-Memory</td><td>37.32</td><td class="best">50.05</td><td>27.41</td><td>41.70</td><td>63.82</td><td>72.61</td><td class="best">78.60</td><td class="best">77.95</td><td class="best">79.98</td><td class="best">78.52</td><td class="best">60.80</td></tr>
           <tr><td>Task Arithmetic</td><td>38.85</td><td>52.18</td><td>31.55</td><td>47.06</td><td class="best">73.73</td><td class="best">82.86</td><td>72.22</td><td>70.49</td><td>75.03</td><td>74.95</td><td>61.89</td></tr>
           <tr><td>TIES</td><td>40.30</td><td>52.04</td><td>31.46</td><td>47.33</td><td>68.24</td><td>76.54</td><td>76.42</td><td>75.24</td><td>78.27</td><td>77.86</td><td>62.37</td></tr>
           <tr><td>TSV</td><td>36.96</td><td>49.23</td><td>28.92</td><td>43.37</td><td>73.64</td><td>82.69</td><td>75.37</td><td>74.10</td><td>78.30</td><td>77.26</td><td>61.98</td></tr>
           <tr><td>RAM</td><td>38.59</td><td>50.38</td><td>31.31</td><td>46.33</td><td>72.56</td><td>81.89</td><td>76.17</td><td>75.29</td><td>78.42</td><td>77.83</td><td>62.88</td></tr>
           <tr><td>OrthoMerge-G-TIES</td><td>40.74</td><td class="best">53.22</td><td class="best">31.98</td><td class="best">47.48</td><td>66.98</td><td>78.17</td><td>74.79</td><td>74.20</td><td>77.75</td><td>76.32</td><td>62.16</td></tr>
-          <tr class="ours"><td>ISO-Merger (ours)</td><td class="best">41.81</td><td>52.73</td><td>31.06</td><td>45.69</td><td>72.32</td><td>81.07</td><td class="best">79.46</td><td>76.77</td><td>79.10</td><td>78.01</td><td class="best">63.80</td></tr>
+          <tr class="ours"><td>ISO-Merger (ours)</td><td class="best">41.81</td><td>52.73</td><td>31.06</td><td>45.69</td><td>72.32</td><td>81.07</td><td class="best">79.46</td><td class="best">76.77</td><td class="best">79.10</td><td class="best">78.01</td><td class="best">63.80</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="table-note">Means over 3 independent stochastic evaluation runs (standard deviations in the paper). Expert rows shaded blue; bold = best expert/merged result per column.</p>
+    <p class="table-note">Means over 3 independent stochastic evaluation runs (standard deviations in the paper). Expert rows shaded blue; bold marks the best <em>expert</em> and the best <em>merged</em> result per column.</p>
 
     <h3>DeepSeek-R1-Distill-Qwen-1.5B · coding + math experts</h3>
     <div class="table-scroll">
@@ -459,12 +459,12 @@
         </thead>
         <tbody>
           <tr><td>Base (DS-R1-Distill-1.5B)</td><td>17.99</td><td>26.24</td><td>16.82</td><td>20.85</td><td>30.90</td><td>23.40</td><td>63.15</td><td>27.33</td><td>43.11</td><td>29.98</td></tr>
-          <tr class="expert"><td>Archer2.0 (coding)</td><td>26.66</td><td class="best">37.26</td><td>26.90</td><td>38.99</td><td>42.05</td><td>28.02</td><td>73.44</td><td>30.09</td><td>49.99</td><td>39.27</td></tr>
-          <tr class="expert"><td>JustRL (math)</td><td>22.23</td><td>31.85</td><td>23.05</td><td>30.18</td><td>53.16</td><td>36.84</td><td>82.78</td><td>34.71</td><td>55.67</td><td>41.16</td></tr>
+          <tr class="expert"><td>Archer2.0 (coding)</td><td class="best">26.66</td><td class="best">37.26</td><td class="best">26.90</td><td class="best">38.99</td><td>42.05</td><td>28.02</td><td>73.44</td><td>30.09</td><td>49.99</td><td>39.27</td></tr>
+          <tr class="expert"><td>JustRL (math)</td><td>22.23</td><td>31.85</td><td>23.05</td><td>30.18</td><td class="best">53.16</td><td class="best">36.84</td><td class="best">82.78</td><td class="best">34.71</td><td class="best">55.67</td><td class="best">41.16</td></tr>
           <tr><td>Task Arithmetic</td><td>26.22</td><td>35.82</td><td>26.70</td><td>36.58</td><td>50.83</td><td>33.09</td><td>80.82</td><td>33.00</td><td>54.31</td><td>41.93</td></tr>
           <tr><td>TIES</td><td>26.37</td><td>36.75</td><td>27.62</td><td>39.45</td><td>54.51</td><td>35.76</td><td>82.13</td><td>33.76</td><td>55.36</td><td>43.52</td></tr>
           <tr><td>TSV</td><td>26.40</td><td>36.83</td><td>27.61</td><td>40.01</td><td>53.16</td><td>35.17</td><td>80.97</td><td>33.88</td><td>54.68</td><td>43.19</td></tr>
-          <tr><td>RAM</td><td class="best">26.71</td><td>36.99</td><td>27.18</td><td>38.83</td><td>54.20</td><td>35.80</td><td>82.28</td><td>34.10</td><td>55.54</td><td>43.51</td></tr>
+          <tr><td>RAM</td><td class="best">26.71</td><td class="best">36.99</td><td>27.18</td><td>38.83</td><td>54.20</td><td>35.80</td><td>82.28</td><td>34.10</td><td>55.54</td><td>43.51</td></tr>
           <tr><td>OrthoMerge-G-TIES</td><td>26.46</td><td>36.73</td><td>27.74</td><td>39.86</td><td>54.55</td><td>35.14</td><td>81.88</td><td>33.55</td><td>55.47</td><td>43.49</td></tr>
           <tr class="ours"><td>ISO-Merger (ours)</td><td>25.52</td><td>36.42</td><td class="best">27.84</td><td class="best">41.84</td><td class="best">55.00</td><td class="best">37.81</td><td class="best">83.53</td><td class="best">34.77</td><td class="best">56.64</td><td class="best">44.38</td></tr>
         </tbody>
