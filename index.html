@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="static/css/index.css?v=6">
+  <link rel="stylesheet" href="static/css/index.css?v=7">
 </head>
 <body>
 
@@ -308,6 +308,32 @@
       <span class="math">W(U, V) = U&thinsp;&Sigma;<sub>0</sub>&thinsp;V<sup>&#8868;</sup></span>,
       &nbsp;<span class="math">U, V</span> on the Stiefel manifold.
     </p>
+
+    <div class="iso-anim" aria-label="U rotates, Sigma-0 stays frozen, V rotates">
+      <div class="iso-anim-item">
+        <img src="static/images/ellipsoid_U.png" alt="Output frame U evolving on its Stiefel manifold" class="ellipsoid rock-cw">
+        <div class="iso-anim-label"><span class="math">U</span> — output frame · <b>moves</b></div>
+      </div>
+      <div class="iso-anim-op math">&times;</div>
+      <div class="iso-anim-item">
+        <div class="sigma-matrix">
+          <span class="bracket left"></span>
+          <span class="sigma-grid math">
+            <span class="s1">&sigma;<sub>1</sub></span>
+            <span class="s2">&sigma;<sub>2</sub></span>
+            <span class="s3">&#8945;</span>
+            <span class="s4">&sigma;<sub>q</sub></span>
+          </span>
+          <span class="bracket right"></span>
+        </div>
+        <div class="iso-anim-label"><span class="math">&Sigma;<sub>0</sub></span> — base spectrum · <b>frozen</b></div>
+      </div>
+      <div class="iso-anim-op math">&times;</div>
+      <div class="iso-anim-item">
+        <img src="static/images/ellipsoid_V.png" alt="Input frame V evolving on its Stiefel manifold" class="ellipsoid rock-ccw">
+        <div class="iso-anim-label"><span class="math">V<sup>&#8868;</sup></span> — input frame · <b>moves</b></div>
+      </div>
+    </div>
 
     <p>
       Every represented matrix shares the base spectrum <span class="math">&Sigma;<sub>0</sub></span> exactly; all learning and composition happen in the frame
