@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="static/css/index.css?v=4">
+  <link rel="stylesheet" href="static/css/index.css?v=5">
 </head>
 <body>
 
@@ -250,17 +250,18 @@
         <p>
           Take specialists trained from a shared base, express each expert as a displacement of the singular frames
           (project → mask trailing modes → solve unit-retention coefficients → retract), and rebuild one fixed-spectrum model.
-          <span class="hl">No post-merge data, rollouts, gradient updates, or on-policy distillation.</span>
         </p>
+        <div class="card-claim">No post-merge data, rollouts, gradient updates, or on-policy distillation.</div>
       </div>
       <div class="method-card online">
         <span class="card-tag">Online</span>
         <h4>ISO-Optimizer — fixed-spectrum RLVR training</h4>
         <p>
           Apply your existing optimizer — AdamW or Muon, states and all — to <span class="math">(U, V)</span> instead of
-          <span class="math">W</span>, keep <span class="math">&Sigma;<sub>0</sub></span> frozen, and retract after each step.
-          A strictly <em>more constrained</em> model class that nevertheless trains in <span class="hl">fewer steps and to higher rewards.</span>
+          <span class="math">W</span>, keep <span class="math">&Sigma;<sub>0</sub></span> frozen, and retract after each step —
+          a strictly <em>more constrained</em> model class.
         </p>
+        <div class="card-claim">Fewer training steps, higher rewards.</div>
       </div>
     </div>
   </div>
