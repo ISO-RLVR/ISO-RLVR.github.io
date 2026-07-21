@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ISO: An RLVR-Native Optimization Stack</title>
+  <meta name="description" content="ISO: inherit the spectrum, optimize the frames. An RLVR-native optimization stack with offline expert merging (ISO-Merger) and online fixed-spectrum training (ISO-Optimizer).">
+  <meta property="og:title" content="ISO: An RLVR-Native Optimization Stack">
+  <meta property="og:description" content="Spectral inheritance: RLVR reuses the base model's weight spectra while learning through the singular frames. ISO turns this into a practical optimization stack.">
+  <meta property="og:image" content="static/images/teaser.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Castoro:ital@0;1&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/index.css">
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<header class="hero container">
+  <h1 class="title"><span class="iso-mark">ISO</span>: An RLVR-Native Optimization Stack</h1>
+  <p class="subtitle">Inherit the spectrum, optimize the frames.</p>
+
+  <p class="authors">
+    <a href="#">Hanqing Zhu</a><sup>1*</sup>,
+    <a href="#">Wenyan Cong</a><sup>1*</sup>,
+    <a href="#">Zhizhou Sha</a><sup>1</sup>,
+    <a href="#">Sagnik Mukherjee</a><sup>2</sup>,
+    <a href="#">Xinyuan Song</a><sup>3</sup>,
+    <a href="#">David González-Martínez</a><sup>6</sup>,
+    <a href="#">Xiaoxia Wu</a><sup>4</sup>,
+    <a href="#">Yuandong Tian</a><sup>5</sup>,
+    <a href="#">Shiwei Liu</a><sup>6</sup>,
+    <a href="#">David Z. Pan</a><sup>1</sup>,
+    <a href="#">Zhangyang "Atlas" Wang</a><sup>1†</sup>
+  </p>
+  <p class="affils">
+    <sup>1</sup>The University of Texas at Austin &nbsp; <sup>2</sup>UIUC &nbsp; <sup>3</sup>Emory University &nbsp;
+    <sup>4</sup>Together AI &nbsp; <sup>5</sup>Recursive Superintelligence Inc &nbsp; <sup>6</sup>ELLIS Institute Tübingen
+  </p>
+  <p class="author-note"><sup>*</sup>Equal contribution &nbsp;·&nbsp; <sup>†</sup>Corresponding author</p>
+
+  <div class="hero-links">
+    <a class="btn btn-accent" href="#"><svg viewBox="0 0 16 16"><path d="M2 2h9l3 3v9a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm8 1H3v11h10V6h-3V3z"/></svg>Paper (arXiv)</a>
+    <a class="btn" href="#"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>Code</a>
+    <a class="btn" href="#citation"><svg viewBox="0 0 16 16"><path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H2.5A1.5 1.5 0 0 0 1 4.5v9A1.5 1.5 0 0 0 2.5 15h9a1.5 1.5 0 0 0 1.5-1.5V13h1.5A1.5 1.5 0 0 0 16 11.5v-9A1.5 1.5 0 0 0 14.5 1h-8zM13 13v.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5H5v7A1.5 1.5 0 0 0 6.5 13H13z"/></svg>BibTeX</a>
+  </div>
+</header>
+
+<!-- ================= TEASER ================= -->
+<div class="teaser container wide">
+  <div class="teaser-wrap">
+    <img src="static/images/teaser.png" alt="From spectral inheritance to Isospectral Optimization: RLVR keeps the base spectrum while both singular frames move; ISO-Merger composes experts offline and ISO-Optimizer trains online in fixed-spectrum coordinates."
+         onerror="this.closest('.teaser-wrap').classList.add('missing')">
+    <div class="teaser-fallback">
+      <b>Teaser figure placeholder.</b><br>
+      Export Figure&nbsp;1 from the paper PDF and save it as <code>static/images/teaser.png</code><br>
+      (e.g. <code>pdftoppm -png -r 220 -f 2 -l 2 ISO_arxiv.pdf</code>, then crop the figure).
+    </div>
+  </div>
+  <p class="figure-caption">
+    <b>From spectral inheritance to Isospectral Optimization.</b>
+    Unconstrained RLVR changes both singular frames while the weight spectra stay close to their base values — and restoring the base spectrum
+    <span class="math">&Sigma;<sub>0</sub></span> costs almost nothing.
+    ISO turns this regularity into an inductive bias: reuse <span class="math">&Sigma;<sub>0</sub></span>, optimize
+    <span class="math">(U,&thinsp;V)</span> — offline as <b>ISO-Merger</b> and online as <b>ISO-Optimizer</b>.
+  </p>
+</div>
+
+<!-- ================= TLDR ================= -->
+<div class="container">
+  <div class="tldr">
+    <span class="label">TL;DR</span>
+    RLVR barely rewrites the base model's singular-value spectra — the new capability lives in the singular <em>frames</em>.
+    We verify this functionally (you can put the base spectrum back, or never let it move, and keep the gains), and turn it into
+    <b>ISO</b>, a fixed-spectrum optimization stack: <b>ISO-Merger</b> composes shared-base RL experts with <em>no data, rollouts, gradients, or distillation</em>,
+    and <b>ISO-Optimizer</b> runs AdamW/Muon on the frames and reaches matched RLVR accuracy with up to <b>2.7&times; fewer training steps</b>.
+  </div>
+</div>
+
+<!-- ================= FINDING 1: SPECTRAL INHERITANCE ================= -->
+<section id="spectral-inheritance">
+  <div class="container">
+    <span class="section-kicker">Observation → Function</span>
+    <h2>Spectra stay: spectral inheritance in RLVR</h2>
+    <p>
+      Write each weight matrix as <span class="math">W = U&thinsp;&Sigma;&thinsp;V<sup>&#8868;</sup></span>:
+      the spectrum <span class="math">&Sigma;</span> sets the scale of each singular mode, the frames
+      <span class="math">(U, V)</span> set its output/input directions.
+      Across RLVR runs — including a public reasoning run trained for <b>3,000+ updates</b> — the learned checkpoint sits strikingly close to the
+      <em>fixed-spectrum family</em> of its base weights: the spectral residual is only <b>&approx;3%</b> of the total weight displacement,
+      versus <b>&approx;35%</b> for a comparable SFT transition. SFT reshapes the spectrum; RLVR doesn't need to.
+    </p>
+    <p>
+      Proximity alone could be a high-dimensional accident, so we test it <em>functionally</em>, with interventions in both directions:
+      restore the base spectrum after training, or never let it move at all.
+    </p>
+
+    <div class="takeaway">
+      <span class="takeaway-title">Takeaway 1 — Spectral inheritance.</span>
+      RLVR can <em>reuse</em> the base model's weight spectra rather than rewrite them:
+      restoring the base spectrum in the RL-trained frames preserves the gains, and training with the spectrum
+      frozen from step one still learns strongly. The acquired behavior lives in the frames.
+    </div>
+
+    <h3>The rebase experiment, interactive</h3>
+    <p>
+      Take an RLVR checkpoint (<span class="math rm">DeepSeek-R1-Distill-Qwen-1.5B → Nemotron-Research-Reasoning-Qwen-1.5B</span>),
+      <b>keep its learned frames</b> <span class="math">(U<sub>RL</sub>, V<sub>RL</sub>)</span> fixed, and interpolate <em>only the spectrum</em>
+      between the base model's <span class="math">&Sigma;<sub>0</sub></span> and the RL-trained <span class="math">&Sigma;<sub>RL</sub></span>.
+      At <span class="math">&alpha; = 0</span> the RL model's spectrum is fully replaced by the base spectrum.
+      Drag the slider — the accuracy doesn't care:
+    </p>
+
+    <div class="alpha-lab">
+      <div class="lab-title">Spectrum interpolation with RL-trained frames fixed</div>
+      <div class="lab-sub">Every point on this slider is a different model. Only the singular values change; the frames never move.</div>
+
+      <div class="alpha-formula">
+        <span class="math">W&#771;(&alpha;) &nbsp;=&nbsp; U<sub>RL</sub>&thinsp;
+        [&thinsp;<span class="coef coef-base" id="coef-base">1.00</span>&thinsp;&middot;&thinsp;&Sigma;<sub>0</sub>
+        &nbsp;+&nbsp;
+        <span class="coef coef-rl" id="coef-rl">0.00</span>&thinsp;&middot;&thinsp;&Sigma;<sub>RL</sub>&thinsp;]&thinsp;
+        V<sub>RL</sub><sup>&#8868;</sup></span>
+      </div>
+
+      <div class="alpha-controls">
+        <span class="alpha-readout" id="alpha-readout">α = 0.00</span>
+        <input type="range" class="alpha-slider" id="alpha-slider" min="0" max="1" step="0.01" value="0"
+               aria-label="Spectrum interpolation coefficient alpha">
+        <button class="play-btn" id="alpha-play">▶ Sweep α</button>
+      </div>
+      <div class="alpha-endpoints">
+        <span>α = 0 &nbsp;·&nbsp; base spectrum <span class="math">&Sigma;<sub>0</sub></span> restored</span>
+        <span class="rl-end">α = 1 &nbsp;·&nbsp; original RL checkpoint</span>
+      </div>
+
+      <div class="alpha-stats">
+        <div class="stat-tile primary">
+          <div class="stat-label">Average score at current <span class="no-tt">α</span></div>
+          <div class="stat-value"><span id="avg-at-alpha">–</span></div>
+          <div class="stat-note" id="avg-note"></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Base model (pre-RL)</div>
+          <div class="stat-value">33.0</div>
+          <div class="stat-note">average over the 7 benchmarks</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-label">Δ vs. full RL checkpoint</div>
+          <div class="stat-value"><span id="delta-vs-rl">–</span></div>
+          <div class="stat-note">≈ 0 at every α: the spectrum change was never needed</div>
+        </div>
+      </div>
+
+      <svg id="alpha-chart" role="img" aria-label="Per-benchmark scores under spectrum interpolation; bars stay flat as alpha varies, far above the base-model reference marks."></svg>
+      <div class="chart-legend">
+        <span class="key"><span class="swatch-bar"></span> score of <span class="math">W&#771;(&alpha;)</span> — RL frames, interpolated spectrum</span>
+        <span class="key"><span class="swatch-dash"></span> base model before RLVR</span>
+      </div>
+
+      <details class="data-table">
+        <summary>Show anchor data (digitized from Fig. 4a)</summary>
+        <div class="table-scroll">
+          <table class="results">
+            <thead><tr><th>Benchmark</th><th>Base</th><th>α=0.0</th><th>α=0.2</th><th>α=0.4</th><th>α=0.6</th><th>α=0.8</th><th>α=1.0 (RL)</th></tr></thead>
+            <tbody id="anchor-table-body"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+    <p class="figure-caption">
+      <b>Restoring the base spectrum preserves RLVR's gains at every α.</b>
+      The converse interventions complete the picture: grafting the RL spectrum onto the <em>base</em> frames gives no improvement,
+      and a spectrum-only parameterization (frames frozen, singular values trainable) fails to learn comparably.
+      What RLVR needs to change is the frames.
+    </p>
+  </div>
+</section>
+
+<!-- ================= FINDING 2: BOTH FRAMES ================= -->
+<section id="frames">
+  <div class="container">
+    <span class="section-kicker">Structure</span>
+    <h2>Frames move — and <em>both</em> must stay adaptable</h2>
+    <p>
+      If the spectrum can be inherited, which variables must remain free? We reconstruct RL endpoints under four structural restrictions
+      and measure how much of the checkpoint update each one <em>fails</em> to explain
+      (two-stage VLA RL pipeline, transition <span class="math">W<sub>0</sub> → W<sub>2</sub></span>, median across layers):
+    </p>
+
+    <div class="mini-bars" aria-label="Unexplained update ratio under four structural restrictions">
+      <div class="mini-bar-row">
+        <span class="mb-label">Remix within both incoming subspaces (<span class="math">u</span><sub>mix</sub>)</span>
+        <span class="mb-track"><span class="mb-fill" style="width:87%"></span></span>
+        <span class="mb-value">87%</span>
+      </div>
+      <div class="mini-bar-row">
+        <span class="mb-label">Freeze output subspace only (<span class="math">u</span><sub>L</sub>)</span>
+        <span class="mb-track"><span class="mb-fill" style="width:45%"></span></span>
+        <span class="mb-value">45%</span>
+      </div>
+      <div class="mini-bar-row">
+        <span class="mb-label">Freeze input subspace only (<span class="math">u</span><sub>R</sub>)</span>
+        <span class="mb-track"><span class="mb-fill" style="width:42%"></span></span>
+        <span class="mb-value">42%</span>
+      </div>
+      <div class="mini-bar-row highlight">
+        <span class="mb-label"><b>Fix the spectrum, adapt both frames</b> (<span class="math">u</span><sub>iso</sub>)</span>
+        <span class="mb-track"><span class="mb-fill" style="width:1.8%"></span></span>
+        <span class="mb-value">1.8%</span>
+      </div>
+      <p class="mini-caption">Fraction of the checkpoint update left unexplained by the best reconstruction in each class (lower is better; 100% = no change explained). The same pattern recurs across sequential RL stages with distinct objectives.</p>
+    </div>
+
+    <div class="takeaway">
+      <span class="takeaway-title">Takeaway 2 — Fix the spectrum, keep both frames adaptable.</span>
+      Even permissive remixing inside the incoming subspaces, or freezing just one side, leaves a large share of the update unexplained.
+      Retaining the incoming spectrum while adapting <em>both</em> frames leaves only ~2% — directly motivating ISO's parameterization
+      <span class="math">W(U,V) = U&thinsp;&Sigma;<sub>0</sub>&thinsp;V<sup>&#8868;</sup></span>.
+    </div>
+  </div>
+</section>
+
+<!-- ================= METHOD ================= -->
+<section id="method">
+  <div class="container">
+    <span class="section-kicker">Method</span>
+    <h2>ISO: Isospectral Optimization</h2>
+
+    <p class="principle">
+      <span class="em">Inherit the spectrum, optimize the frames:</span>&nbsp;
+      <span class="math">W(U, V) = U&thinsp;&Sigma;<sub>0</sub>&thinsp;V<sup>&#8868;</sup></span>,
+      &nbsp;<span class="math">U, V</span> on the Stiefel manifold.
+    </p>
+
+    <p>
+      Every represented matrix shares the base spectrum <span class="math">&Sigma;<sub>0</sub></span> exactly; all learning and composition happen in the frame
+      coordinates, with a polar retraction restoring orthonormality. ISO is a <em>stack</em>, not a single optimizer — one principle, two instantiations
+      spanning the RLVR workflow:
+    </p>
+
+    <div class="card-grid">
+      <div class="method-card offline">
+        <span class="card-tag">Offline</span>
+        <h4>ISO-Merger — compose RL experts without rollouts</h4>
+        <p>
+          Take specialists trained from a shared base, express each expert as a displacement of the singular frames
+          (project → mask trailing modes → solve unit-retention coefficients → retract), and rebuild one fixed-spectrum model.
+          <b>No post-merge data, rollouts, gradient updates, or on-policy distillation.</b>
+        </p>
+      </div>
+      <div class="method-card online">
+        <span class="card-tag">Online</span>
+        <h4>ISO-Optimizer — fixed-spectrum RLVR training</h4>
+        <p>
+          Apply your existing optimizer — AdamW or Muon, states and all — to <span class="math">(U, V)</span> instead of
+          <span class="math">W</span>, keep <span class="math">&Sigma;<sub>0</sub></span> frozen, and retract after each step.
+          A strictly <em>more constrained</em> model class that nevertheless trains faster and higher. Retraction adds only ≈7% to end-to-end step time.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULTS: ISO-MERGER ================= -->
+<section id="results-merger">
+  <div class="container">
+    <span class="section-kicker">Results · Offline</span>
+    <h2>ISO-Merger: data-free expert composition</h2>
+    <p>
+      Merging RLVR specialists in fixed-spectrum frame coordinates recovers their complementary capabilities — with zero post-merge compute.
+      Recovery of each specialist's own score by the single merged model:
+    </p>
+
+    <div class="mini-bars recovery">
+      <div class="recovery-group-title">Qwen2.5-7B-Instruct — 3 RL experts</div>
+      <div class="mini-bar-row">
+        <span class="mb-label">Coding</span>
+        <span class="mb-track"><span class="mb-fill" style="width:96.5%"></span><span class="ref-100" style="left:90.9%"></span></span>
+        <span class="mb-value">106.2%</span>
+      </div>
+      <div class="mini-bar-row">
+        <span class="mb-label">Tool use</span>
+        <span class="mb-track"><span class="mb-fill" style="width:90.7%"></span><span class="ref-100" style="left:90.9%"></span></span>
+        <span class="mb-value">99.8%</span>
+      </div>
+      <div class="mini-bar-row">
+        <span class="mb-label">Memory</span>
+        <span class="mb-track"><span class="mb-fill" style="width:90.5%"></span><span class="ref-100" style="left:90.9%"></span></span>
+        <span class="mb-value">99.5%</span>
+      </div>
+      <div class="recovery-group-title">DeepSeek-R1-Distill-Qwen-1.5B — 2 RL experts</div>
+      <div class="mini-bar-row">
+        <span class="mb-label">Coding</span>
+        <span class="mb-track"><span class="mb-fill" style="width:92.2%"></span><span class="ref-100" style="left:90.9%"></span></span>
+        <span class="mb-value">101.4%</span>
+      </div>
+      <div class="mini-bar-row">
+        <span class="mb-label">Math</span>
+        <span class="mb-track"><span class="mb-fill" style="width:92.5%"></span><span class="ref-100" style="left:90.9%"></span></span>
+        <span class="mb-value">101.7%</span>
+      </div>
+      <p class="mini-caption">Recovery of specialist score (%); the vertical mark is 100% = the original specialist itself.</p>
+    </div>
+
+    <h3>Qwen2.5-7B-Instruct · coding + tool-use + memory experts</h3>
+    <div class="table-scroll">
+      <table class="results">
+        <thead>
+          <tr>
+            <th rowspan="2">Method</th>
+            <th colspan="2">LiveBench</th><th colspan="2">LCB v2</th>
+            <th colspan="2">Tool Use (BFCL)</th>
+            <th colspan="2">HotpotQA</th><th colspan="2">SQuAD</th>
+            <th rowspan="2">Avg</th>
+          </tr>
+          <tr>
+            <th>ACC</th><th>UT</th><th>ACC</th><th>UT</th>
+            <th>Live</th><th>Non-Live</th>
+            <th>32K</th><th>64K</th><th>32K</th><th>64K</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Base (Qwen2.5-7B-Instruct)</td><td>36.25</td><td>48.27</td><td>28.31</td><td>43.08</td><td>62.96</td><td>69.26</td><td>49.87</td><td>45.54</td><td>58.90</td><td>56.77</td><td>49.92</td></tr>
+          <tr class="expert"><td>RLVR-Coder</td><td>37.42</td><td>49.42</td><td>30.17</td><td>44.24</td><td>63.37</td><td>68.07</td><td>50.21</td><td>45.61</td><td>60.51</td><td>56.84</td><td>50.59</td></tr>
+          <tr class="expert"><td>RLVR-Tool</td><td>36.87</td><td>48.08</td><td>28.20</td><td>42.43</td><td>71.83</td><td>81.82</td><td>50.39</td><td>45.33</td><td>59.73</td><td>57.86</td><td>52.25</td></tr>
+          <tr class="expert"><td>RLVR-Memory</td><td>37.32</td><td>50.05</td><td>27.41</td><td>41.70</td><td>63.82</td><td>72.61</td><td>78.60</td><td class="best">77.95</td><td class="best">79.98</td><td class="best">78.52</td><td>60.80</td></tr>
+          <tr><td>Task Arithmetic</td><td>38.85</td><td>52.18</td><td>31.55</td><td>47.06</td><td class="best">73.73</td><td class="best">82.86</td><td>72.22</td><td>70.49</td><td>75.03</td><td>74.95</td><td>61.89</td></tr>
+          <tr><td>TIES</td><td>40.30</td><td>52.04</td><td>31.46</td><td>47.33</td><td>68.24</td><td>76.54</td><td>76.42</td><td>75.24</td><td>78.27</td><td>77.86</td><td>62.37</td></tr>
+          <tr><td>TSV</td><td>36.96</td><td>49.23</td><td>28.92</td><td>43.37</td><td>73.64</td><td>82.69</td><td>75.37</td><td>74.10</td><td>78.30</td><td>77.26</td><td>61.98</td></tr>
+          <tr><td>RAM</td><td>38.59</td><td>50.38</td><td>31.31</td><td>46.33</td><td>72.56</td><td>81.89</td><td>76.17</td><td>75.29</td><td>78.42</td><td>77.83</td><td>62.88</td></tr>
+          <tr><td>OrthoMerge-G-TIES</td><td>40.74</td><td class="best">53.22</td><td class="best">31.98</td><td class="best">47.48</td><td>66.98</td><td>78.17</td><td>74.79</td><td>74.20</td><td>77.75</td><td>76.32</td><td>62.16</td></tr>
+          <tr class="ours"><td>ISO-Merger (ours)</td><td class="best">41.81</td><td>52.73</td><td>31.06</td><td>45.69</td><td>72.32</td><td>81.07</td><td class="best">79.46</td><td>76.77</td><td>79.10</td><td>78.01</td><td class="best">63.80</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Means over 3 independent stochastic evaluation runs (standard deviations in the paper). Expert rows shaded blue; bold = best expert/merged result per column.</p>
+
+    <h3>DeepSeek-R1-Distill-Qwen-1.5B · coding + math experts</h3>
+    <div class="table-scroll">
+      <table class="results">
+        <thead>
+          <tr>
+            <th rowspan="2">Method</th>
+            <th colspan="2">LiveBench</th><th colspan="2">LCB v5</th>
+            <th>AIME24</th><th>AIME25</th><th>AMC23</th><th>Minerva</th><th>Olympiad</th>
+            <th rowspan="2">Avg</th>
+          </tr>
+          <tr><th>ACC</th><th>UT</th><th>ACC</th><th>UT</th><th>@32</th><th>@32</th><th>@8</th><th>@4</th><th>@4</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Base (DS-R1-Distill-1.5B)</td><td>17.99</td><td>26.24</td><td>16.82</td><td>20.85</td><td>30.90</td><td>23.40</td><td>63.15</td><td>27.33</td><td>43.11</td><td>29.98</td></tr>
+          <tr class="expert"><td>Archer2.0 (coding)</td><td>26.66</td><td class="best">37.26</td><td>26.90</td><td>38.99</td><td>42.05</td><td>28.02</td><td>73.44</td><td>30.09</td><td>49.99</td><td>39.27</td></tr>
+          <tr class="expert"><td>JustRL (math)</td><td>22.23</td><td>31.85</td><td>23.05</td><td>30.18</td><td>53.16</td><td>36.84</td><td>82.78</td><td>34.71</td><td>55.67</td><td>41.16</td></tr>
+          <tr><td>Task Arithmetic</td><td>26.22</td><td>35.82</td><td>26.70</td><td>36.58</td><td>50.83</td><td>33.09</td><td>80.82</td><td>33.00</td><td>54.31</td><td>41.93</td></tr>
+          <tr><td>TIES</td><td>26.37</td><td>36.75</td><td>27.62</td><td>39.45</td><td>54.51</td><td>35.76</td><td>82.13</td><td>33.76</td><td>55.36</td><td>43.52</td></tr>
+          <tr><td>TSV</td><td>26.40</td><td>36.83</td><td>27.61</td><td>40.01</td><td>53.16</td><td>35.17</td><td>80.97</td><td>33.88</td><td>54.68</td><td>43.19</td></tr>
+          <tr><td>RAM</td><td class="best">26.71</td><td>36.99</td><td>27.18</td><td>38.83</td><td>54.20</td><td>35.80</td><td>82.28</td><td>34.10</td><td>55.54</td><td>43.51</td></tr>
+          <tr><td>OrthoMerge-G-TIES</td><td>26.46</td><td>36.73</td><td>27.74</td><td>39.86</td><td>54.55</td><td>35.14</td><td>81.88</td><td>33.55</td><td>55.47</td><td>43.49</td></tr>
+          <tr class="ours"><td>ISO-Merger (ours)</td><td>25.52</td><td>36.42</td><td class="best">27.84</td><td class="best">41.84</td><td class="best">55.00</td><td class="best">37.81</td><td class="best">83.53</td><td class="best">34.77</td><td class="best">56.64</td><td class="best">44.38</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">ISO-Merger achieves the strongest aggregate performance among the compared data-free merging methods on both backbones, and improves worst@4 by 1.62 / 1.36 points — more consistent capability recovery, not just a better mean.</p>
+  </div>
+</section>
+
+<!-- ================= RESULTS: ISO-OPTIMIZER ================= -->
+<section id="results-optimizer">
+  <div class="container wide">
+    <div class="container" style="padding:0">
+      <span class="section-kicker">Results · Online</span>
+      <h2>ISO-Optimizer: same reward signal, fewer steps, higher accuracy</h2>
+      <p>
+        ISO-AdamW uses a <em>single</em> learning rate everywhere (7.5&times;10<sup>&minus;7</sup>), while the weight-space baselines get a full
+        learning-rate sweep. On <b>Qwen3-8B-Base</b>, ISO-AdamW reaches AdamW's 270-step accuracy by step&nbsp;100 —
+        <b>≈2.7&times; fewer training steps</b> — and keeps improving to 0.509 vs. 0.495:
+      </p>
+    </div>
+
+    <div class="figure">
+      <img src="static/images/math_8b.png" alt="Math accuracy on Qwen3-8B-Base: ISO-AdamW stays above AdamW throughout and reaches AdamW's final accuracy 2.7 times earlier." style="max-width:760px">
+      <p class="figure-caption" style="text-align:center">
+        <b>Qwen3-8B-Base, DeepMath-103K.</b> Aggregate average@16 over AIME24/25, AMC23, Minerva, OlympiadBench.
+        Extending AdamW 60 more steps yields no further gain — the gap is not under-training.
+      </p>
+    </div>
+
+    <div class="fig-grid">
+      <div class="figure">
+        <img src="static/images/math_1p7b_adamw.png" alt="Qwen3-1.7B-Base: ISO-AdamW vs a five-way AdamW learning-rate sweep.">
+        <p class="figure-caption"><b>Qwen3-1.7B-Base</b> — highest final aggregate accuracy vs. the full AdamW sweep.</p>
+      </div>
+      <div class="figure">
+        <img src="static/images/math_4b_adamw.png" alt="Qwen3-4B-Base: ISO-AdamW matches the best AdamW final accuracy with about 2.2x fewer steps.">
+        <p class="figure-caption"><b>Qwen3-4B-Base</b> — matches the best AdamW with <b>≈2.2&times;</b> fewer steps, then keeps improving.</p>
+      </div>
+      <div class="figure">
+        <img src="static/images/math_4b_muon.png" alt="Qwen3-4B-Base with Muon: ISO-Muon reaches the best Muon accuracy with 1.4x fewer steps.">
+        <p class="figure-caption"><b>ISO-Muon</b> — the construction transfers across base optimizers: <b>≈1.4&times;</b> fewer steps than tuned Muon.</p>
+      </div>
+      <div class="figure">
+        <img src="static/images/coding_ds1p5b.png" alt="Coding on DeepSeek-R1-Distill-Qwen-1.5B: ISO-AdamW leads tuned AdamW on LiveCodeBench.">
+        <p class="figure-caption"><b>Coding (DS-1.5B, ArcherCodeR)</b> — leads tuned AdamW on LiveCodeBench; extended baselines never match its peak.</p>
+      </div>
+    </div>
+
+    <div class="container" style="padding:0">
+      <h3>Math RLVR (average@16, DeepMath-103K)</h3>
+      <div class="table-scroll">
+        <table class="results">
+          <thead>
+            <tr><th>Model</th><th>Method</th><th>AIME24</th><th>AIME25</th><th>AMC23</th><th>Minerva</th><th>Olympiad</th><th>Avg</th></tr>
+          </thead>
+          <tbody>
+            <tr><td rowspan="4">Qwen3-1.7B-Base</td><td>Base</td><td>3.75</td><td>1.25</td><td>23.04</td><td>18.49</td><td>18.43</td><td>12.99</td></tr>
+            <tr><td>AdamW</td><td>13.96</td><td class="best">12.92</td><td>43.45</td><td>32.17</td><td class="best">39.25</td><td>28.35</td></tr>
+            <tr><td>Muon</td><td class="best">16.25</td><td>8.33</td><td>43.60</td><td>32.24</td><td>38.06</td><td>27.70</td></tr>
+            <tr class="ours"><td>ISO-AdamW (ours)</td><td>16.04</td><td>11.04</td><td class="best">44.50</td><td class="best">33.11</td><td>39.01</td><td class="best">28.74</td></tr>
+            <tr><td rowspan="4">Qwen3-4B-Base</td><td>Base</td><td>6.88</td><td>5.00</td><td>25.45</td><td>20.97</td><td>22.43</td><td>16.15</td></tr>
+            <tr><td>AdamW</td><td>25.21</td><td>20.42</td><td>63.55</td><td>45.40</td><td>53.87</td><td>41.69</td></tr>
+            <tr><td>Muon</td><td>25.42</td><td>19.58</td><td>63.63</td><td class="best">46.51</td><td class="best">56.02</td><td>42.23</td></tr>
+            <tr class="ours"><td>ISO-AdamW (ours)</td><td class="best">27.29</td><td class="best">23.13</td><td class="best">65.74</td><td>45.15</td><td>55.99</td><td class="best">43.46</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Checkpoint with the highest aggregate score among the final three evaluations, per run. Baselines use the best learning rate from their sweep.</p>
+
+      <h3>Competitive coding (average@8, LiveCodeBench, 220 steps)</h3>
+      <div class="table-scroll">
+        <table class="results">
+          <thead><tr><th>Method</th><th>LCB v5</th><th>LCB v6</th><th>Avg</th></tr></thead>
+          <tbody>
+            <tr><td>DS-R1-Distill-1.5B</td><td>17.43</td><td>18.41</td><td>17.92</td></tr>
+            <tr><td>AdamW</td><td>24.01</td><td>26.24</td><td>25.13</td></tr>
+            <tr class="ours"><td>ISO-AdamW (ours)</td><td class="best">25.49</td><td class="best">26.91</td><td class="best">26.20</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">
+        Overhead: the FP64 SVD polar retraction adds ≈86&nbsp;s per actor update on Qwen3-4B — only ≈7% of end-to-end RL step time,
+        and amenable to overlap with rollout generation in asynchronous RL systems.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CITATION ================= -->
+<section id="citation">
+  <div class="container">
+    <span class="section-kicker">Reference</span>
+    <h2>Citation</h2>
+    <div class="bibtex-wrap">
+      <button class="copy-btn" id="copy-bibtex">Copy</button>
+<pre class="bibtex" id="bibtex-block">@article{zhu2026iso,
+  title   = {ISO: An RLVR-Native Optimization Stack},
+  author  = {Zhu, Hanqing and Cong, Wenyan and Sha, Zhizhou and Mukherjee, Sagnik and
+             Song, Xinyuan and Gonz{\'a}lez-Mart{\'i}nez, David and Wu, Xiaoxia and
+             Tian, Yuandong and Liu, Shiwei and Pan, David Z. and Wang, Zhangyang},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    ISO builds on our prior analysis of RLVR optimization dynamics, <a href="https://arxiv.org/abs/2511.08567"><em>The Path Not Taken</em></a>.<br>
+    Page design inspired by the <a href="https://nerfies.github.io/">Nerfies</a> template family. © 2026 the authors.
+  </div>
+</footer>
+
+<script src="static/js/alpha.js"></script>
+<script>
+  // fill anchor-data table from the same DATA used by the chart
+  (function () {
+    const tbody = document.getElementById("anchor-table-body");
+    DATA.forEach(b => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = "<td>" + b.name + "</td><td>" + b.base.toFixed(1) + "</td>" +
+        b.scores.map(s => "<td>" + s.toFixed(1) + "</td>").join("");
+      tbody.appendChild(tr);
+    });
+  })();
+
+  // copy bibtex
+  document.getElementById("copy-bibtex").addEventListener("click", function () {
+    navigator.clipboard.writeText(document.getElementById("bibtex-block").textContent).then(() => {
+      this.textContent = "Copied!";
+      setTimeout(() => (this.textContent = "Copy"), 1600);
+    });
+  });
+</script>
+</body>
+</html>
