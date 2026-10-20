@@ -196,7 +196,7 @@ initPanel({
   refColor: COLORS.green,
   refName: "full RL checkpoint",
   tipDeltaLabel: "gap to the RL checkpoint",
-  note: () => "pinned at the SFT model's level (32.9) at every α",
+  note: () => "Near the SFT model’s performance across evaluated α values",
   deltaOf: (avg, _avgAt, refAvg) => avg - refAvg,
   ids: {
     chart: "alpha-chart-sft", slider: "alpha-slider-sft", readout: "alpha-readout-sft",

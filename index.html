@@ -64,7 +64,7 @@
   <p class="figure-caption">
     <b>From spectral inheritance to Isospectral Optimization.</b>
     Unconstrained RLVR changes both singular frames while the weight spectra stay close to their base values — and restoring the base spectrum
-    <span class="math">&Sigma;<sub>0</sub></span> costs almost nothing.
+    <span class="math">&Sigma;<sub>0</sub></span> preserves most acquired gains.
     ISO turns this regularity into an inductive bias: reuse <span class="math">&Sigma;<sub>0</sub></span>, optimize
     <span class="math">(U,&thinsp;V)</span> — offline as <b>ISO-Merger</b> and online as <b>ISO-Optimizer</b>.
   </p>
@@ -74,10 +74,10 @@
 <div class="container">
   <div class="tldr">
     <span class="label">TL;DR</span>
-    RLVR barely rewrites the base model's singular-value spectra — the new capability lives in the singular <em>frames</em>.
-    We verify this functionally (you can put the base spectrum back, or never let it move, and keep the gains), and turn it into
+    RLVR can reuse the base model's singular-value spectra while acquiring new capabilities by adapting the singular <em>frames</em>.
+    We verify this functionally (restoring the base spectrum preserves most acquired gains, and fixing it throughout training supports strong learning), and turn it into
     <b>ISO</b>, a fixed-spectrum optimization stack: <b>ISO-Merger</b> composes shared-base RL experts with <em>no data, rollouts, gradients, or distillation</em>,
-    and <b>ISO-Optimizer</b> runs AdamW/Muon on the frames and reaches matched RLVR accuracy with up to <b>2.7&times; fewer training steps</b>.
+    and <b>ISO-Optimizer</b> runs AdamW/Muon on the frames and reaches matched RLVR accuracy with <b>1.5&times; fewer actor updates on Qwen3-4B-Base</b>.
   </div>
 </div>
 
@@ -91,19 +91,21 @@
       the spectrum <span class="math">&Sigma;</span> sets the scale of each singular mode, the frames
       <span class="math">(U, V)</span> set its output/input directions.
       Across RLVR runs — including a public reasoning run trained for <b>3,000+ updates</b> — the learned checkpoint sits strikingly close to the
-      <em>fixed-spectrum family</em> of its base weights: the spectral residual is only <b>&approx;3%</b> of the total weight displacement,
-      versus <b>&approx;35%</b> for a comparable SFT transition. SFT reshapes the spectrum; RLVR doesn't need to.
+      <em>fixed-spectrum family</em> of its base weights: the <b>pooled spectral residual is approximately 3%</b> of the total base-to-RL weight displacement.
+      In the sequential SFT and RLVR comparison, the mean relative residuals are approximately <b>32% and 2%</b>, respectively.
+      These transitions start from different checkpoints; the SFT endpoint is the RLVR base.
     </p>
     <p>
-      Proximity alone could be a high-dimensional accident, so we test it <em>functionally</em>, with interventions in both directions:
+      Dimension-normalized spectrum-changing energy remains order-one relative to an isotropic reference for RLVR,
+      so proximity alone does not establish a strong preference for spectrum-preserving updates. We test spectral reuse <em>functionally</em>:
       restore the base spectrum after training, or never let it move at all.
     </p>
 
     <div class="takeaway">
       <span class="takeaway-title">Takeaway 1 — Spectral inheritance.</span>
       RLVR can <em>reuse</em> the base model's weight spectra rather than rewrite them:
-      restoring the base spectrum in the RL-trained frames preserves the gains, and training with the spectrum
-      frozen from step one still learns strongly. The acquired behavior lives in the frames.
+      restoring the base spectrum in the RL-trained frames preserves most acquired gains, and training with the spectrum
+      frozen from step one still learns strongly. These interventions support reusing the base spectrum while adapting the frames.
     </div>
 
     <h3>The rebase experiment, interactive</h3>
@@ -112,12 +114,12 @@
       <b>keep its learned frames</b> <span class="math">(U<sub>RL</sub>, V<sub>RL</sub>)</span> fixed, and interpolate <em>only the spectrum</em>
       between the base model's <span class="math">&Sigma;<sub>0</sub></span> and the RL-trained <span class="math">&Sigma;<sub>RL</sub></span>.
       At <span class="math">&alpha; = 0</span> the RL model's spectrum is fully replaced by the base spectrum.
-      Drag the slider — the accuracy doesn't care:
+      Drag the slider to inspect the relatively small changes in accuracy:
     </p>
 
     <div class="alpha-lab">
       <div class="lab-title">Spectrum interpolation with RL-trained frames fixed</div>
-      <div class="lab-sub">Each of the six slider stops is a separately evaluated model. Only the singular values change; the frames never move.</div>
+      <div class="lab-sub">Each of the six slider stops is a separately evaluated model. This panel shows the five math benchmarks; the paper also reports two coding metrics. Only the singular values change; the frames remain fixed.</div>
 
       <div class="alpha-formula">
         <span class="math">W&#771;(&alpha;) &nbsp;=&nbsp; U<sub>RL</sub>&thinsp;
@@ -152,11 +154,11 @@
         <div class="stat-tile">
           <div class="stat-label">Δ vs. full RL checkpoint</div>
           <div class="stat-value"><span id="delta-vs-rl">–</span></div>
-          <div class="stat-note">≈ 0 at every α: the spectrum change was never needed</div>
+          <div class="stat-note">Small aggregate differences across the evaluated α values</div>
         </div>
       </div>
 
-      <svg id="alpha-chart" role="img" aria-label="Per-benchmark scores under spectrum interpolation; bars stay flat as alpha varies, far above the base-model reference marks."></svg>
+      <svg id="alpha-chart" role="img" aria-label="Per-benchmark scores under spectrum interpolation; scores vary little as alpha varies, far above the base-model reference marks."></svg>
       <div class="chart-legend">
         <span class="key"><span class="swatch-bar"></span> score of <span class="math">W&#771;(&alpha;)</span> — RL frames, interpolated spectrum</span>
         <span class="key"><span class="swatch-dash"></span> base model before RLVR</span>
@@ -173,7 +175,7 @@
       </details>
     </div>
     <p class="figure-caption">
-      <b>Restoring the base spectrum preserves RLVR's gains at every α.</b>
+      <b>Restoring the base spectrum preserves most acquired RLVR gains.</b>
       A spectrum-only parameterization (frames frozen, singular values trainable) likewise fails to learn comparably —
       what RLVR needs to change is the frames.
     </p>
@@ -183,7 +185,7 @@
       Run the same interpolation in the opposite direction: <b>fix the frames of the SFT model</b>
       <span class="math">(U<sub>SFT</sub>, V<sub>SFT</sub>)</span> and blend the spectrum <em>toward</em> the RL-trained
       <span class="math">&Sigma;<sub>RL</sub></span>. If RLVR's gains lived in the spectrum, scores should climb toward the RL
-      checkpoint as α grows. They don't move at all:
+      checkpoint as α grows. Scores remain nearly unchanged:
     </p>
 
     <div class="alpha-lab">
@@ -223,11 +225,11 @@
         <div class="stat-tile">
           <div class="stat-label">Δ vs. RL checkpoint</div>
           <div class="stat-value"><span id="delta-vs-rl-sft">–</span></div>
-          <div class="stat-note">the RL spectrum alone buys none of the gains</div>
+          <div class="stat-note">The RL spectrum alone does not yield comparable gains</div>
         </div>
       </div>
 
-      <svg id="alpha-chart-sft" role="img" aria-label="Per-benchmark scores with SFT frames fixed and the spectrum interpolated toward the RL one; bars stay flat at the SFT level, far below the RL-checkpoint reference marks."></svg>
+      <svg id="alpha-chart-sft" role="img" aria-label="Per-benchmark scores with SFT frames fixed and the spectrum interpolated toward the RL one; scores remain near the SFT level, far below the RL-checkpoint reference marks."></svg>
       <div class="chart-legend">
         <span class="key"><span class="swatch-bar slate"></span> score of <span class="math">W&#771;(&alpha;)</span> — SFT frames, interpolated spectrum</span>
         <span class="key"><span class="swatch-dash green"></span> full RL checkpoint (Nemotron, ~3k RLVR updates)</span>
@@ -244,11 +246,10 @@
       </details>
     </div>
     <p class="figure-caption">
-      <b>The RL spectrum in SFT frames buys nothing — at any mixing ratio.</b>
-      All 7 metrics stay pinned at the SFT level (α-sweep range ≤ 3.2pp, within Mean@n sampling noise; the α=0 endpoint
-      reproduces the original SFT model to ≤ 0.8pp). The spectra themselves barely differ — relative drift
-      ‖ΔΣ‖/‖Σ‖ ≤ 0.04% across all 198 matrices. Together with the panel above, the evidence runs in both directions:
-      <em>useful RLVR progress is carried by singular-frame motion, not by spectral rescaling.</em>
+      <b>Substituting the RL spectrum into SFT frames does not yield comparable gains.</b>
+      Across the evaluated interpolation coefficients, the seven metrics remain near the SFT model's performance,
+      with an observed range of approximately 3.2 percentage points or less per metric.
+      Together with spectrum restoration in RL-trained frames, this supports the functional reusability of the base spectrum.
     </p>
   </div>
 </section>
@@ -309,9 +310,9 @@
       &nbsp;<span class="math">U, V</span> on the Stiefel manifold.
     </p>
 
-    <div class="iso-anim" aria-label="The tangent plane rides along the trajectory on each frame manifold while Sigma-0 stays frozen">
+    <div class="iso-anim" aria-label="Schematic ambient frame updates followed by polar restoration while Sigma-0 stays frozen">
       <div class="iso-anim-item">
-        <canvas id="manifold-u" aria-label="Output frame U moving on its Stiefel manifold with the tangent plane anchored at the current point"></canvas>
+        <canvas id="manifold-u" aria-label="Output frame U: an ambient optimizer update followed by restoration to the Stiefel manifold"></canvas>
         <div class="iso-anim-label"><span class="math">U</span> — output frame · <b>moves</b></div>
       </div>
       <div class="iso-anim-op math">&times;</div>
@@ -330,15 +331,16 @@
       </div>
       <div class="iso-anim-op math">&times;</div>
       <div class="iso-anim-item">
-        <canvas id="manifold-v" aria-label="Input frame V moving on its Stiefel manifold with the tangent plane anchored at the current point"></canvas>
+        <canvas id="manifold-v" aria-label="Input frame V: an ambient optimizer update followed by restoration to the Stiefel manifold"></canvas>
         <div class="iso-anim-label"><span class="math">V<sup>&#8868;</sup></span> — input frame · <b>moves</b></div>
       </div>
     </div>
     <p class="figure-caption" style="text-align:center; margin-top:-16px; margin-bottom:26px">
-      The tangent space <span class="math">T<sub>U<sub>t</sub></sub></span> rides along the trajectory: at each step the base optimizer takes a
-      <span style="color:var(--accent); font-weight:600">tentative update</span> in the tangent plane, and the
-      <span style="color:#c62828; font-weight:600">polar retraction</span> puts the iterate back on the manifold — so every
-      <span class="math">W<sub>t</sub> = U<sub>t</sub>&thinsp;&Sigma;<sub>0</sub>&thinsp;V<sub>t</sub><sup>&#8868;</sup></span> keeps the base spectrum exactly.
+      The base optimizer receives <b>ambient factor gradients</b> and takes a
+      <span style="color:var(--accent); font-weight:600">tentative frame update</span> that need not lie in the tangent plane.
+      <span style="color:#c62828; font-weight:600">Polar restoration</span> restores orthonormal frames, so
+      <span class="math">W<sub>t</sub> = U<sub>t</sub>&thinsp;&Sigma;<sub>0</sub>&thinsp;V<sub>t</sub><sup>&#8868;</sup></span>
+      retains the base spectrum in exact arithmetic. The ellipsoids and update paths are schematic; the gray planes show local tangent geometry.
     </p>
 
     <p>
@@ -377,7 +379,7 @@
     <span class="section-kicker">Results · Offline</span>
     <h2>ISO-Merger: data-free expert composition</h2>
     <p>
-      Merging RLVR specialists in fixed-spectrum frame coordinates recovers their complementary capabilities — with zero post-merge compute.
+      Merging RLVR specialists in fixed-spectrum frame coordinates recovers their complementary capabilities — without post-merge training, rollouts, or distillation.
       Recovery of each specialist's own score by the single merged model:
     </p>
 
@@ -481,36 +483,38 @@
       <span class="section-kicker">Results · Online</span>
       <h2>ISO-Optimizer: same reward signal, fewer steps, higher accuracy</h2>
       <p>
-        ISO-AdamW uses a <em>single</em> learning rate everywhere (7.5&times;10<sup>&minus;7</sup>), while the weight-space baselines get a full
-        learning-rate sweep. On <b>Qwen3-8B-Base</b>, ISO-AdamW reaches AdamW's 270-step accuracy by step&nbsp;100 —
-        <b>≈2.7&times; fewer training steps</b> — and keeps improving to 0.509 vs. 0.495:
+        ISO-AdamW uses a frame learning rate of <b>1&times;10<sup>&minus;6</sup></b> at both math scales,
+        while AdamW and Muon baselines are tuned over learning-rate sweeps. At 400 actor updates,
+        ISO-AdamW achieves <b>29.41</b> on Qwen3-1.7B-Base and <b>46.98</b> on Qwen3-4B-Base —
+        improvements of <b>1.21</b> and <b>2.16</b> points over the strongest tested AdamW baselines.
       </p>
     </div>
 
     <div class="figure">
-      <img src="static/images/math_8b.png" alt="Math accuracy on Qwen3-8B-Base: ISO-AdamW stays above AdamW throughout and reaches AdamW's final accuracy 2.7 times earlier." style="max-width:760px">
+      <img src="static/images/iso_overhead_time.png" alt="Qwen3-4B-Base wall-clock profiling: ISO-AdamW reaches AdamW's 400-update accuracy at update 260, saving 124 hours (34%)." style="max-width:760px">
       <p class="figure-caption" style="text-align:center">
-        <b>Qwen3-8B-Base, DeepMath-103K.</b> Aggregate average@16 over AIME24/25, AMC23, Minerva, OlympiadBench.
-        Extending AdamW 60 more steps yields no further gain — the gap is not under-training.
+        <b>Qwen3-4B-Base, DeepMath-103K.</b> ISO-AdamW reaches AdamW's 400-update accuracy at update 260,
+        saving <b>124 hours (34%)</b>, and finishes 2.16 points higher at update 400.
+        Additional optimizer computation is about <b>49 seconds per step (1.2%)</b> of the profiled end-to-end step time.
       </p>
     </div>
 
     <div class="fig-grid">
       <div class="figure">
-        <img src="static/images/math_1p7b_adamw.png" alt="Qwen3-1.7B-Base: ISO-AdamW vs a five-way AdamW learning-rate sweep.">
+        <img src="static/images/math_1p7b_adamw.png" alt="Qwen3-1.7B-Base: ISO-AdamW reaches 29.41 average@16 accuracy after 400 actor updates versus 28.20 for tuned AdamW.">
         <p class="figure-caption"><b>Qwen3-1.7B-Base</b> — highest final aggregate accuracy vs. the full AdamW sweep.</p>
       </div>
       <div class="figure">
-        <img src="static/images/math_4b_adamw.png" alt="Qwen3-4B-Base: ISO-AdamW matches the best AdamW final accuracy with about 2.2x fewer steps.">
-        <p class="figure-caption"><b>Qwen3-4B-Base</b> — matches the best AdamW with <b>≈2.2&times;</b> fewer steps, then keeps improving.</p>
+        <img src="static/images/math_4b_adamw.png" alt="Qwen3-4B-Base: ISO-AdamW reaches AdamW’s 400-update accuracy at update 260 and finishes at 46.98 versus 44.82.">
+        <p class="figure-caption"><b>Qwen3-4B-Base</b> — matches AdamW’s 400-update accuracy at <b>update 260</b>, then keeps improving.</p>
       </div>
       <div class="figure">
-        <img src="static/images/math_4b_muon.png" alt="Qwen3-4B-Base with Muon: ISO-Muon reaches the best Muon accuracy with 1.4x fewer steps.">
-        <p class="figure-caption"><b>ISO-Muon</b> — the construction transfers across base optimizers: <b>≈1.4&times;</b> fewer steps than tuned Muon.</p>
+        <img src="static/images/math_4b_muon.png" alt="Qwen3-4B-Base: ISO-Muon reaches the strongest Muon run’s 400-update accuracy at update 300, finishing at 46.2 versus 45.5.">
+        <p class="figure-caption"><b>ISO-Muon</b> — matches the strongest Muon run’s 400-update accuracy at <b>update 300</b>; final scores are <b>46.2 vs. 45.5</b>.</p>
       </div>
       <div class="figure">
         <img src="static/images/coding_ds1p5b.png" alt="Coding on DeepSeek-R1-Distill-Qwen-1.5B: ISO-AdamW leads tuned AdamW on LiveCodeBench.">
-        <p class="figure-caption"><b>Coding (DS-1.5B, ArcherCodeR)</b> — leads tuned AdamW on LiveCodeBench; extended baselines never match its peak.</p>
+        <p class="figure-caption"><b>Coding (DS-1.5B, ArcherCodeR)</b> — scores <b>25.58 vs. 24.80</b> at 200 updates; AdamW runs extended to 260 updates do not match ISO-AdamW’s peak of 25.7.</p>
       </div>
     </div>
 
@@ -522,34 +526,69 @@
             <tr><th>Model</th><th>Method</th><th>AIME24</th><th>AIME25</th><th>AMC23</th><th>Minerva</th><th>Olympiad</th><th>Avg</th></tr>
           </thead>
           <tbody>
-            <tr><td rowspan="4">Qwen3-1.7B-Base</td><td>Base</td><td>3.75</td><td>1.25</td><td>23.04</td><td>18.49</td><td>18.43</td><td>12.99</td></tr>
-            <tr><td>AdamW</td><td>13.96</td><td class="best">12.92</td><td>43.45</td><td>32.17</td><td class="best">39.25</td><td>28.35</td></tr>
-            <tr><td>Muon</td><td class="best">16.25</td><td>8.33</td><td>43.60</td><td>32.24</td><td>38.06</td><td>27.70</td></tr>
-            <tr class="ours"><td>ISO-AdamW (ours)</td><td>16.04</td><td>11.04</td><td class="best">44.50</td><td class="best">33.11</td><td>39.01</td><td class="best">28.74</td></tr>
-            <tr><td rowspan="4">Qwen3-4B-Base</td><td>Base</td><td>6.88</td><td>5.00</td><td>25.45</td><td>20.97</td><td>22.43</td><td>16.15</td></tr>
-            <tr><td>AdamW</td><td>25.21</td><td>20.42</td><td>63.55</td><td>45.40</td><td>53.87</td><td>41.69</td></tr>
-            <tr><td>Muon</td><td>25.42</td><td>19.58</td><td>63.63</td><td class="best">46.51</td><td class="best">56.02</td><td>42.23</td></tr>
-            <tr class="ours"><td>ISO-AdamW (ours)</td><td class="best">27.29</td><td class="best">23.13</td><td class="best">65.74</td><td>45.15</td><td>55.99</td><td class="best">43.46</td></tr>
+            <tr><td rowspan="4">Qwen3-1.7B-Base</td><td>Base</td><td>3.33</td><td>2.50</td><td>23.34</td><td>18.43</td><td>19.19</td><td>13.36</td></tr>
+            <tr><td>AdamW</td><td>14.38</td><td>10.21</td><td>44.58</td><td>33.02</td><td>38.80</td><td>28.20</td></tr>
+            <tr><td>Muon</td><td>15.22</td><td>11.26</td><td class="best">45.51</td><td>32.96</td><td>40.09</td><td>29.01</td></tr>
+            <tr class="ours"><td>ISO-AdamW (ours)</td><td class="best">16.67</td><td class="best">11.67</td><td>44.50</td><td class="best">33.92</td><td class="best">40.30</td><td class="best">29.41</td></tr>
+            <tr><td rowspan="4">Qwen3-4B-Base</td><td>Base</td><td>5.00</td><td>3.96</td><td>26.58</td><td>20.43</td><td>21.95</td><td>15.58</td></tr>
+            <tr><td>AdamW</td><td>32.92</td><td>22.08</td><td>67.77</td><td>45.29</td><td>56.02</td><td>44.82</td></tr>
+            <tr><td>Muon</td><td>32.29</td><td>25.00</td><td>66.34</td><td>46.12</td><td class="best">57.82</td><td>45.51</td></tr>
+            <tr class="ours"><td>ISO-AdamW (ours)</td><td class="best">33.54</td><td class="best">28.13</td><td class="best">68.60</td><td class="best">46.97</td><td>57.64</td><td class="best">46.98</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="table-note">Checkpoint with the highest aggregate score among the final three evaluations, per run. Baselines use the best learning rate from their sweep.</p>
+      <p class="table-note">Final checkpoint at actor update 400. ISO-AdamW uses a frame learning rate of 10<sup>&minus;6</sup>. AdamW is swept over {0.75, 1, 2, 3}&times;10<sup>&minus;6</sup>, plus 5&times;10<sup>&minus;6</sup> on 4B; Muon over {2.5, 5, 7.5}&times;10<sup>&minus;5</sup>.</p>
 
-      <h3>Competitive coding (average@8, LiveCodeBench, 220 steps)</h3>
+      <h3>Competitive coding (average@8, LiveCodeBench, 200 actor updates)</h3>
       <div class="table-scroll">
         <table class="results">
           <thead><tr><th>Method</th><th>LCB v5</th><th>LCB v6</th><th>Avg</th></tr></thead>
           <tbody>
-            <tr><td>DS-R1-Distill-1.5B</td><td>17.43</td><td>18.41</td><td>17.92</td></tr>
-            <tr><td>AdamW</td><td>24.01</td><td>26.24</td><td>25.13</td></tr>
-            <tr class="ours"><td>ISO-AdamW (ours)</td><td class="best">25.49</td><td class="best">26.91</td><td class="best">26.20</td></tr>
+            <tr><td>DS-R1-Distill-1.5B</td><td>16.31</td><td>18.32</td><td>17.31</td></tr>
+            <tr><td>AdamW</td><td>24.60</td><td>25.00</td><td>24.80</td></tr>
+            <tr class="ours"><td>ISO-AdamW (ours)</td><td class="best">24.64</td><td class="best">26.53</td><td class="best">25.58</td></tr>
           </tbody>
         </table>
       </div>
       <p class="table-note">
-        Overhead: the FP64 SVD polar retraction adds ≈86&nbsp;s per actor update on Qwen3-4B — only ≈7% of end-to-end RL step time,
-        and amenable to overlap with rollout generation in asynchronous RL systems.
+        ISO-AdamW uses a frame learning rate of 1.5&times;10<sup>&minus;6</sup> for coding; AdamW is swept over {1, 2, 3, 5}&times;10<sup>&minus;6</sup>. The main comparison uses 200 actor updates to limit multi-epoching on the smaller coding dataset.
       </p>
+
+      <h3>Comparison with Pion</h3>
+      <p>
+        Pion is a concurrent spectrum-preserving optimizer with its own momentum and step-size rules.
+        ISO applies a chosen base optimizer directly to both singular frames.
+        Among completed 400-update runs, <b>ISO-AdamW achieves the highest final accuracy at both scales</b>;
+        Pion outperforms AdamW at 10<sup>&minus;6</sup> but not the strongest tested AdamW configuration.
+      </p>
+      <div class="figure">
+        <img src="static/images/math_pion.png" loading="lazy" alt="ISO-AdamW, Pion, and AdamW learning curves on Qwen3-1.7B-Base and Qwen3-4B-Base." style="max-width:100%">
+        <p class="figure-caption">
+          <b>Qwen3-1.7B-Base (left) and Qwen3-4B-Base (right).</b>
+          On 4B, ISO-AdamW reaches Pion's 400-update accuracy using approximately <b>40% as many actor updates</b>.
+        </p>
+      </div>
+      <p class="table-note">
+        Pion uses its official implementation. Learning rates are swept over {1, 2, 3}&times;10<sup>&minus;6</sup> on 1.7B;
+        the 3&times;10<sup>&minus;6</sup> run is stopped early after accuracy starts declining at update 160.
+        On 4B, computational constraints limit Pion to its published RLVR learning rate of 10<sup>&minus;6</sup>, without further tuning.
+      </p>
+
+      <h3>Ablation: does learning the spectrum help?</h3>
+      <p>
+        We compare ISO-AdamW with a variant that also trains the diagonal spectrum
+        <span class="math">&Sigma;</span>, initialized at <span class="math">&Sigma;<sub>0</sub></span>,
+        while retaining the same factorization and orthonormal frame constraints.
+        On <b>Qwen3-1.7B-Base</b>, fixed and trainable spectra yield similar learning trajectories.
+      </p>
+      <div class="figure">
+        <img src="static/images/learnable_sigma.png" loading="lazy" alt="Fixed versus trainable spectrum on Qwen3-1.7B-Base: aggregate accuracy reaches 29.4 and 29.6 at update 400, respectively." style="max-width:560px">
+        <p class="figure-caption">
+          <b>Fixed vs. trainable spectrum.</b> At update 400, aggregate accuracy is <b>29.4 vs. 29.6</b>, respectively.
+          The learned spectrum's relative drift is only <b>0.0065%</b>.
+          Comparable observed accuracy supports reusing the base spectrum.
+        </p>
+      </div>
     </div>
   </div>
 </section>
@@ -584,8 +623,8 @@
   </div>
 </footer>
 
-<script src="static/js/alpha.js?v=2"></script>
-<script src="static/js/manifold.js?v=1"></script>
+<script src="static/js/alpha.js?v=3"></script>
+<script src="static/js/manifold.js?v=2"></script>
 <script>
   // copy bibtex
   document.getElementById("copy-bibtex").addEventListener("click", function () {

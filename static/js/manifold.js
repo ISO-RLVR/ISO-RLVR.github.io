@@ -2,7 +2,7 @@
    Self-playing manifold animation for the ISO principle:
    a wireframe ellipsoid (schematic Stiefel manifold), a moving
    point U_t on its surface, the tangent plane T_{U_t} anchored
-   at that point, a tentative optimizer step in the tangent
+   at that point, an ambient tentative optimizer step outside the tangent
    plane (orange) and the polar retraction back to the surface
    (red dashed). Two instances: U (blue, oblate) and V (green,
    prolate). Vanilla canvas, no dependencies.
@@ -187,8 +187,8 @@
       const P = proj(p3);
 
       if (t < 1) {
-        // tentative update in the tangent plane (orange) ...
-        const tip3 = add(p3, scale(e1, cfg.planeHalf * 0.92));
+        // Schematic ambient update with both tangential and normal components.
+        const tip3 = add(p3, add(scale(e1, cfg.planeHalf * 0.92), scale(n, cfg.planeHalf * 0.55)));
         const T = proj(tip3);
         ctx.strokeStyle = "#d9530b";
         ctx.lineWidth = 2.2;

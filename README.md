@@ -14,30 +14,28 @@ static/js/alpha.js      # interactive α-slider (spectrum-interpolation demo)
 static/images/          # figures
 ```
 
-## TODO before going live
-
-1. **Teaser image** — export Figure 1 from the paper PDF and save it as
-   `static/images/teaser.png` (until then the page shows a placeholder box):
-
-   ```bash
-   pdftoppm -png -r 220 -f 2 -l 2 ISO_arxiv.pdf fig1   # page 2 = Figure 1
-   # crop to the figure and save as static/images/teaser.png
-   ```
-
-2. **Links** — code repo is set (https://github.com/zhuhanqing/ISO); still missing: the
-   arXiv URL on the Paper button, author homepage links (search `href="#"`), and the
-   arXiv id in the BibTeX block.
-
 ## Figure provenance
 
-| File | Source |
+Results and displayed figures are synchronized with the local Overleaf source
+`ISO_arxiv_0928`. The page layout and styles are retained. The manifold schematic shows ambient frame updates followed by polar restoration.
+
+| File | Source under `ISO_arxiv_0928/Figure/` |
 |---|---|
-| `math_8b.png` | paper Fig. 9 (`visualization/benchmark_avg_acc_mean16_8b_neurips_v3.png`) |
-| `math_1p7b_adamw.png` | paper Fig. 6 left (`...1.7b_adam_neurips_v2.png`) |
-| `math_4b_adamw.png` | paper Fig. 6 right (`...4b_step400_neurips_v1.png`) |
-| `math_4b_muon.png` | paper Fig. 8 (`...4b_muon_step300_neurips_v3.png`) |
-| `coding_ds1p5b.png` | paper Fig. 7 (`...mean8_step220_neurips_v3.png`) |
-| `iso_8b_annotated.png` | teaser-style annotated 8B curve (currently unused spare) |
+| `teaser.png` | `teaser.png` |
+| `math_1p7b_adamw.png` | `math_1.7b_adam_iclr.png` |
+| `math_4b_adamw.png` | `math_4b_adam_iclr.png` |
+| `math_4b_muon.png` | `math_4b_muon_iclr.png` |
+| `coding_ds1p5b.png` | `coding_iclr.png` |
+| `iso_overhead_time.png` | `iso_overhead_time.png` |
+| `math_pion.png` | `math_pion.png` |
+| `learnable_sigma.png` | `learnable_sigma.png` |
+
+Optimizer tables and accompanying claims follow `Section_new/5_exp_b.tex`;
+checkpoint selection follows `Section_new/8_appendix.tex`. Merger tables were
+checked against `Table/model_merge_Qwen.tex` and `Table/model_merge_deepseek.tex`
+and already match. Legacy 8B images are retained as unused assets. The bundled
+`static/ISO.pdf` was refreshed from https://arxiv.org/pdf/2607.19331 on 2026-10-20;
+its main result values match the local Overleaf source.
 
 ## Preview locally
 
